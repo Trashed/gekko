@@ -69,8 +69,6 @@ method.update = function(candle) {
     var adx = this.talibIndicators.myadx.result;
     var rsi = this.talibIndicators.myrsi.result;
 
-    // console.log('\tadx: ', adx);
-    // console.log('\trsi: ', rsi);
 
     // Create a state array and push values to it.
     var state = [];
@@ -94,7 +92,9 @@ method.update = function(candle) {
     // TODO: Handle Q-learning algo
     // Start training algorithm when there's more than one state array.
     log.debug('\t###### Training deepqlearn #######\n');
-    log.debug('\tCandle count: ', candleCount);
+    log.debug('\tadx: ', adx);
+    log.debug('\trsi: ', rsi);
+    log.debug('\tCount: ', count);
     if (States.length > 1) {
 
 
@@ -150,7 +150,7 @@ method.update = function(candle) {
     // brain.epsilon_test_time = 0.0;
     // brain.learning = false;
 
-    candleCount++;
+    // candleCount++;
 }
 
 
