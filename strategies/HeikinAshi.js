@@ -70,6 +70,8 @@ strat.log = function() {
 // update or not.
 strat.check = function() {
 
+    var lastAdviced = this.trend.adviced;
+
     // Hallow candle with no lower "shadow" -> should indicate strong uptrend.
     if (this.xlow >= this.xopen) {
 
@@ -90,7 +92,7 @@ strat.check = function() {
         this.trend.duration++;
 
         this.uptrend.avgduration = (this.uptrend.avgduration + this.trend.duration) / 2;
-        this.trend.persisted = this.trend.duration > 2;
+        // this.trend.persisted = this.trend.duration > 2;
 
         log.debug('>>>>>> Up trend properties:');
         log.debug('\txClose: ', this.xclose);
@@ -120,7 +122,7 @@ strat.check = function() {
         this.trend.duration++;
 
         this.downtrend.avgduration = (this.downtrend.avgduration + this.trend.duration) / 2;
-        this.trend.persisted = this.trend.duration > 1;
+        // this.trend.persisted = this.trend.duration > 1;
 
         log.debug('<<<<<<< Down trend properties:');
         log.debug('\txClose: ', this.xclose);
@@ -134,26 +136,24 @@ strat.check = function() {
 
     } else {
 
-        /*if (this.trend.duration > this.rangetrend.maxduration && this.trend.direction == 'none')
-            this.rangetrend.maxduration = this.trend.duration;
-
-        var lastadviced = this.trend.adviced;
+        // if (this.trend.duration > this.rangetrend.maxduration && this.trend.direction == 'none')
+        //     this.rangetrend.maxduration = this.trend.duration;
+        //
+        // var lastadviced = this.trend.adviced;
         // New trend detected
         if(this.trend.direction !== 'none') {
           // reset the state for the new trend
 
-
-          log.debug('\tADVICED: ', lastadviced);
           this.trend = {
             duration: 0,
             persisted: false,
             direction: 'none',
-            adviced: lastadviced
+            adviced: lastAdviced
           };
         }
         this.trend.duration++;
-
-        this.rangetrend.avgduration = (this.rangetrend.avgduration + this.trend.duration) / 2;*/
+        // this.trend.persisted = this.trend.duration > 1;
+        // this.rangetrend.avgduration = (this.rangetrend.avgduration + this.trend.duration) / 2;
         //this.trend.persisted = this.trend.duration > 1;
 
         log.debug('======== Trend is ranging:');
@@ -168,11 +168,11 @@ strat.check = function() {
     }
 
     // Give advice
-    if (this.trend.direction == 'up' && this.trend.persisted && !this.trend.adviced) {
+    if (this.trend.direction == 'up' /*&& this.trend.persisted */&& !this.trend.adviced) {
         log.debug('Buying signal received\n');
         this.advice('long');
         this.trend.adviced = true;
-    } else if (this.trend.direction == 'down' && this.trend.persisted && !this.trend.adviced) {
+    } else if (this.trend.direction == 'down' && !this.trend.adviced || (this.trend.direction == 'none' /*&& this.trend.persisted */&& !this.trend.adviced)) {
         log.debug('Selling signal received\n');
         this.advice('short');
         this.trend.adviced = true;

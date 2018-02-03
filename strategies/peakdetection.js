@@ -45,7 +45,7 @@ strat.init = function() {
 
     console.log('peakdetection - settings: ', this.settings);
 
-    this.requiredHistory = this.tradingAdvisor.historySize;
+    // this.requiredHistory = this.tradingAdvisor.historySize;
 
 
     this.addIndicator('zsignal', 'ZSignal', this.settings);
