@@ -5,19 +5,13 @@
 
 var log = require('../core/log');
 var math = require('mathjs');
+var hacandles = require('./candles/HeikinAshi.js');
 
 // Let's create our own strat
 var strat = {};
 
 // Prepare everything our method needs
 strat.init = function() {
-
-    this.xclose = 0;
-    this.xcloseprev = 0;
-    this.xopen = 0;
-    this.xopenprev = 0;
-    this.xhigh = 0;
-    this.xlow = 0;
 
     this.trend = {
       direction: 'none',
@@ -30,18 +24,8 @@ strat.init = function() {
 // What happens on every new candle?
 strat.update = function(candle) {
 
-    // console.log('new candle: ', candle);
-    this.xcloseprev = this.xclose;
-    this.xopenprev = this.xopen;
+    this.haCandle = hacandles.calcHACandle(candle);
 
-    // Calculate new Heikin-Ashi candles
-    this.xclose = (candle.open + candle.close + candle.high + candle.low) / 4;
-    // xOpen = [xOpen(Previous Bar) + xClose(Previous Bar)]/2
-    this.xopen = (this.xopenprev + this.xcloseprev) / 2;
-    // xHigh = Max(High, xOpen, xClose)
-    this.xhigh = math.max(candle.high, this.xopen, this.xclose);
-    // xLow = Min(Low, xOpen, xClose)
-    this.xlow = math.min(candle.low, this.xopen, this.xclose);
 }
 
 // For debugging purposes.
@@ -54,7 +38,10 @@ strat.log = function() {
 strat.check = function() {
 
     // Hallow candle with no lower "shadow" -> should indicate strong uptrend.
-    if (this.xclose > this.xopen && this.xlow >= this.xopen && this.xhigh > this.xclose) {
+    if (this.haCandle.xlow >= this.haCandle.xopen) {
+
+        if (this.trend.duration > this.uptrend.maxduration && this.trend.direction == 'up')
+            this.uptrend.maxduration = this.trend.duration;
 
         // New trend detected
         if(this.trend.direction !== 'up')
@@ -69,14 +56,17 @@ strat.check = function() {
         //this.trend.persisted = this.trend.duration > 1;
 
         log.debug('>>>>>> Up trend properties:');
-        log.debug('\txClose: ', this.xclose);
-        log.debug('\txOpen: ', this.xopen);
-        log.debug('\txHigh: ', this.xhigh);
-        log.debug('\txLow: ', this.xlow);
+        log.debug('\txClose: ', this.haCandle.xclose);
+        log.debug('\txOpen: ', this.haCandle.xopen);
+        log.debug('\txHigh: ', this.haCandle.xhigh);
+        log.debug('\txLow: ', this.haCandle.xlow);
         log.debug('\tDuration: ', this.trend.duration);
         log.debug('>>>>>>>>>>>>>>>>>>>>>>>>>>\n');
 
-    } else if (this.xclose < this.xopen && this.xlow < this.xclose && this.xhigh <= this.xopen) {
+    } else if (this.haCandle.xhigh <= this.haCandle.xopen) {
+
+        if (this.trend.duration > this.downtrend.maxduration && this.trend.direction == 'down')
+            this.downtrend.maxduration = this.trend.duration;
 
         // New trend detected
         if(this.trend.direction !== 'down')
@@ -91,10 +81,10 @@ strat.check = function() {
         //this.trend.persisted = this.trend.duration > 0;
 
         log.debug('<<<<<<< Down trend properties:');
-        log.debug('\txClose: ', this.xclose);
-        log.debug('\txOpen: ', this.xopen);
-        log.debug('\txHigh: ', this.xhigh);
-        log.debug('\txLow: ', this.xlow);
+        log.debug('\txClose: ', this.haCandle.xclose);
+        log.debug('\txOpen: ', this.haCandle.xopen);
+        log.debug('\txHigh: ', this.haCandle.xhigh);
+        log.debug('\txLow: ', this.haCandle.xlow);
         log.debug('\tDuration: ', this.trend.duration);
         log.debug('<<<<<<<<<<<<<<<<<<<<<<<<<\n');
 
@@ -113,11 +103,13 @@ strat.check = function() {
         //this.trend.persisted = this.trend.duration > 1;
 
         log.debug('======== Trend is ranging:');
-        log.debug('\txClose: ', this.xclose);
-        log.debug('\txOpen: ', this.xopen);
-        log.debug('\txHigh: ', this.xhigh);
-        log.debug('\txLow: ', this.xlow);
-        log.debug('\tDuration: ', this.trend.duration);
+        log.debug('\txClose: ', this.haCandle.xclose);
+        log.debug('\txOpen: ', this.haCandle.xopen);
+        log.debug('\txHigh: ', this.haCandle.xhigh);
+        log.debug('\txLow: ', this.haCandle.xlow);
+        // log.debug('\tDuration: ', this.trend.duration);
+        // log.debug('\tRangetrend Max Duration: ', this.rangetrend.maxduration);
+        // log.debug('\tRangetrend Avg Duration: ', this.rangetrend.avgduration);
         log.debug('====================\n');
     }
 
