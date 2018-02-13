@@ -36,7 +36,7 @@ var lastAction = 0; // Actions: 0 - hold, 1 - buy, 2 - sell
 // Options for Q-learner
 var inputs = 2;
 var actions = 3;
-var temporalWindow = 3;
+var temporalWindow = 50;
 var networkSize = inputs * temporalWindow + actions * temporalWindow + inputs;
 
 const MAX_STORED_CANDLES = 500;
@@ -45,19 +45,19 @@ const MAX_STORED_CANDLES = 500;
 // Network layer setup
 var layerDefs = [];
 layerDefs.push({type: 'input', out_sx: 1, out_sy: 1, out_depth: networkSize});
-layerDefs.push({type: 'fc', num_neurons: 7, activation: 'relu'});
-// layerDefs.push({type: 'fc', num_neurons: 10, activation: 'relu'});
+layerDefs.push({type: 'fc', num_neurons: 50, activation: 'relu'});
+layerDefs.push({type: 'fc', num_neurons: 10, activation: 'relu'});
 layerDefs.push({type: 'svm', num_classes: actions});
 layerDefs.push({type:'regression', num_neurons: 3});
 // Network trainer
 var tdTrainerOpts = {learning_rate: 0.001, momentum: 0.0, batch_size: 64, l2_decay: 0.01};
 var opts = {};
 opts.temporal_window = temporalWindow;
-opts.experience_size = 300;
-opts.start_learn_threshold = 10;
+opts.experience_size = 3000;
+opts.start_learn_threshold = 100;
 opts.gamma = 0.9;
-opts.learning_steps_total = 2000;
-opts.learning_steps_burnin = 30;
+opts.learning_steps_total = 20000;
+opts.learning_steps_burnin = 300;
 opts.epsilon_min = 0.05;
 opts.epsilon_test_time = 0.05;
 opts.random_action_distribution = [0.97, 0.02, 0.01];    // Random action should try to hold more than buy or sell
@@ -225,7 +225,9 @@ method.update = function(candle) {
 
 
 method.log = function() {
-    // log.debug("prediction count:", predictioncount);
+    // if (count < MAX_PREDICTION_COUNT) {
+    //     log.debug('\tCurrent training profit: ', trainingProfit);
+    // }
 }
 
 const MAX_PREDICTION_COUNT = 1000;
